@@ -13,7 +13,6 @@ class Repository():
             see = self.conn(**data)
             self.session.add(see)
             self.session.commit()
-            self.session.close()
             return True
         except Exception as error:
             self.session.rollback()
@@ -28,7 +27,6 @@ class Repository():
             self.session.add(see)
             self.session.commit()
             self.session.refresh(see)
-            # self.session.close()
             return see
         except Exception as error:
             self.session.rollback()
