@@ -90,14 +90,16 @@ class ChatService:
             "status_code": CREATED if response else OK,
         }
 
-    def get_by_session_id(self, id: str) -> list:
+    def get_by_session_id(
+        self, id: str, limit: int = 20, offset: int = 0
+    ) -> list:
         data = {"session_id": id}
         response = self.chat_repository.get_all_match(data)
         if response:
             response = [data_json.to_json() for data_json in response]
         return {
             "status": "success",
-            "data": response if response else [],
+            "data": response[offset:offset + limit] if response else [],
             "message":
                 "El chat consultado" if response else "El chat no existe",
             "status_code": OK

@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from starlette.responses import JSONResponse
 from typing import Annotated
 
 from app.controllers.serializers.response import (
     Response as ResponseSerializer,
+    PaginatedResponse,
 )
 from app.controllers.serializers.chat import (
     MessageCreate as ChatSerializer,
@@ -35,13 +36,21 @@ async def create_chat(
 @router.get(
     "/messages/{session_id}",
     tags=["messages"],
-    response_model=ResponseSerializer
+    response_model=PaginatedResponse
 )
 async def get_chat(
     session_id: str,
-    current_user: Annotated[dict, Depends(get_current_user)]
+    current_user: Annotated[dict, Depends(get_current_user)],
+    limit: Annotated[
+        int, Query(ge=1, le=100, description="Número de elementos por página")
+    ] = 20,
+    offset: Annotated[
+        int, Query(ge=0, description="Número de elementos a omitir")
+    ] = 0,
 ):
-    response = chat_service.get_by_session_id(session_id)
+    response = chat_service.get_by_session_id(
+        session_id, limit, offset
+    )
     return JSONResponse(
         status_code=response.pop("status_code"),
         content=response

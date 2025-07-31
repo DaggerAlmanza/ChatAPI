@@ -11,3 +11,10 @@ class Response(BaseModel):
         None,
         description="Data for response"
     )
+
+
+class PaginatedResponse(BaseModel):
+    status: str
+    data: list
+    message: str
+    pagination: dict
