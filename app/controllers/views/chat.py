@@ -1,4 +1,7 @@
 from fastapi import APIRouter, Depends, Query
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi_cache.decorator import cache
 from starlette.responses import JSONResponse
 from typing import Annotated
 
@@ -15,6 +18,8 @@ from app.controllers.views.authenticate import get_current_user
 
 router = APIRouter()
 chat_service = ChatService()
+
+FastAPICache.init(InMemoryBackend())
 
 
 @router.post(
@@ -38,6 +43,7 @@ async def create_chat(
     tags=["messages"],
     response_model=PaginatedResponse
 )
+@cache(expire=30)
 async def get_chat(
     session_id: str,
     current_user: Annotated[dict, Depends(get_current_user)],

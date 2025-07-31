@@ -1,4 +1,5 @@
 import re
+import math
 
 from app.config.constants import (
     BAD_REQUEST,
@@ -44,6 +45,17 @@ class ChatService:
             "processed_at": general_helpers.get_datetime()
         }
         data["metadata_message"] = metadata
+
+    def __create_pagination(self, response: list, limit: int, offset: int):
+        current_page = (offset // limit) + 1 if limit > 0 else 1
+        total_pages = math.ceil(len(response) / limit) if limit > 0 else 1
+        return {
+            "limit": limit,
+            "offset": offset,
+            "page": current_page,
+            "total_pages": total_pages,
+            "total_items": len(response)
+        }
 
     def create_response_message(self, data: dict) -> dict:
         if data.get("sender") == "user":
@@ -93,14 +105,27 @@ class ChatService:
     def get_by_session_id(
         self, id: str, limit: int = 20, offset: int = 0
     ) -> list:
+        if offset == limit:
+            return {
+                "status": "error",
+                "error": {
+                    "code": "INVALID_OFFSET",
+                    "message": "El offset no puede ser igual al limit",
+                    "details":
+                        "El offset no puede ser igual al limit, por favor revisa tus parámetros"
+                },
+                "status_code": BAD_REQUEST
+            }
         data = {"session_id": id}
         response = self.chat_repository.get_all_match(data)
         if response:
             response = [data_json.to_json() for data_json in response]
+        pagination = self.__create_pagination(response, limit, offset)
         return {
             "status": "success",
             "data": response[offset:offset + limit] if response else [],
             "message":
                 "El chat consultado" if response else "El chat no existe",
-            "status_code": OK
+            "status_code": OK,
+            "pagination": pagination
         }
