@@ -66,8 +66,9 @@ Esta es una API RESTful simple para el procesamiento de mensajes de chat, constr
 
     - Documentación de la API generada automáticamente por FastAPI (Swagger UI / ReDoc).
 
-Estructura del Proyecto
-.
+- Estructura del Proyecto
+
+
 ├── app
 -   ├── config
 -   -   ├── __init__.py
@@ -119,9 +120,17 @@ Estructura del Proyecto
 -   -   -   ├── test_chatbot.py
 -   -   -   ├── test_security.py
 -   -   -   ├── test_util.py
+
 ├── .env
+
 ├── .gitignore
+
 ├── README.md
+
+├── docker-compose.yml
+
+├── Dockerfile
+
 └── requirements.txt
 
 # Configuración y Uso
@@ -183,14 +192,27 @@ Documentación Interactiva de la API (Swagger UI): http://127.0.0.1:8000/docs
 
 Documentación Alternativa de la API (ReDoc): http://127.0.0.1:8000/redoc
 
+## Ejecutar con Docker Compose
+1. Para poner en marcha la aplicación y todos sus servicios definidos en `docker-compose.yml`
+Simplemente ejecuta el siguiente comando en tu terminal, desde el directorio raíz del proyecto donde se encuentra el archivo `docker-compose.yml`:
+
+```sh
+docker-compose up
+```
+
 # Endpoints de la API
 1. POST /api/messages
-- Recibe un nuevo mensaje de chat para su procesamiento y almacenamiento.
-- Tenemos un pequeño simulador de chatbot para probar la API.
-- Aqui guardamos las respuestas de nuestro sistema.
-- URL: /api/messages
-- Método: POST
-- Tipo de Contenido: application/json
+    - Recibe un nuevo mensaje de chat para su procesamiento y almacenamiento.
+
+    - Tenemos un pequeño simulador de chatbot para probar la API.
+
+    - Aqui guardamos las respuestas de nuestro sistema.
+    
+    - URL: /api/messages
+    
+    - Método: POST
+    
+    - Tipo de Contenido: application/json
 
 - Cuerpo de la Solicitud (Ejemplo):
 ```json
@@ -237,52 +259,12 @@ Documentación Alternativa de la API (ReDoc): http://127.0.0.1:8000/redoc
 }
 ```
 
-```json
-{
-  "status": "error",
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Error de validación de entrada",
-    "details": [
-      {
-        "loc": ["body", "message_id"],
-        "msg": "field required",
-        "type": "missing"
-      }
-    ]
-  }
-}
-```
-
-- 422 Unprocessable Entity (Contenido Inapropiado):
-
-```json
-{
-  "status": "error",
-  "error": {
-    "code": "INAPPROPRIATE_CONTENT",
-    "message": "El mensaje contiene contenido inapropiado",
-    "details": "La palabra 'badword' no está permitida."
-  }
-}
-```
-
-- 500 Internal Server Error (Error del Servidor):
-
-```json
-{
-  "status": "error",
-  "error": {
-    "code": "INTERNAL_SERVER_ERROR",
-    "message": "Ocurrió un error inesperado en el servidor",
-    "details": "Detalles del error interno."
-  }
-}
-```
 2. GET /api/messages/{session_id}
-- Recupera mensajes asociados a una session_id específica.
-- URL: /api/messages/{session_id}
-- Método: GET
+    - Recupera mensajes asociados a una session_id específica.
+
+    - URL: /api/messages/{session_id}
+    
+    - Método: GET
 
 -Parámetros de Ruta:
     - session_id (string, requerido): El ID de la sesión.
@@ -300,6 +282,7 @@ Respuestas Posibles:
 
 200 OK (Éxito):
 
+```json
 {
   "status": "success",
   "data": [
@@ -327,22 +310,67 @@ Respuestas Posibles:
         "processed_at": "2023-06-15T14:31:01Z"
       }
     }
-  ]
-}
-
-404 Not Found (Sesión no encontrada):
-
-{
-  "status": "error",
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Sesión no encontrada",
-    "details": "No se encontraron mensajes para la sesión 'non-existent-session'."
+  ],
+  "message": "El chat consultado.",
+  "pagination": {
+    "limit": 10,
+    "offset": 0,
+    "page": 1,
+    "total_pages": 1,
+    "total_items": 9
   }
 }
 
-500 Internal Server Error (Error del Servidor):
-(Similar al error 500 de POST)
+```
+
+3. GET /api/users/{id}
+    - Recupera el usuario asociado a una id específica.
+
+    - URL: /api/messages/{session_id}
+    
+    - Método: GET
+
+4. POST /api/users
+    - Crea un nuevo usuario.
+
+    - URL: /api/users
+    
+    - Método: POST
+
+5. DELETE /api/users/{id}
+    - Elimina un usuario.
+
+    - URL: /api/users/{id}
+    
+    - Método: DELETE
+
+6. GET /token
+    - Obtiene el token de autenticación.
+
+    - URL: /token
+    
+    - Método: GET
+
+7. POST /token
+    - Para autenticarse desde el frontend.
+
+    - URL: /token
+    
+    - Método: POST
+
+8. GET /current_user
+    - Obtiene el usuario actual.
+
+    - URL: /current_user
+    
+    - Método: GET
+
+9. GET /Root
+    - Para verificar que el servidor está funcionando.
+
+    - URL: /Root
+    
+    - Método: GET
 
 # Ejecutar Pruebas
 Para ejecutar las pruebas unitarias y de integración, asegúrate de tener pytest y httpx instalados (pip install pytest). Luego, ejecuta el siguiente comando desde el directorio raíz del proyecto:

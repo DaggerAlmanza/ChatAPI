@@ -38,6 +38,15 @@ class ChatService:
         return len(words)
 
     @staticmethod
+    def __get_sender(id: str, sender: str = None):
+        if sender:
+            return {
+                "session_id": id,
+                "sender": sender
+            }
+        return {"session_id": id}
+
+    @staticmethod
     def create_metadata(data: dict):
         metadata = {
             "word_count": ChatService.__count_words(data.get("content")),
@@ -91,6 +100,17 @@ class ChatService:
                     },
                 "status_code": BAD_REQUEST
             }
+        if data.get("sender") not in ["user", "system"]:
+            return {
+                "status": "error",
+                "error": {
+                    "code": "INVALID_FORMAT",
+                    "message": "El sender debe ser 'user' o 'system'",
+                    "details":
+                        "El sender debe ser 'user' o 'system', por favor revisa tus parámetros"
+                },
+                "status_code": BAD_REQUEST
+            }
         ChatService.create_metadata(data)
         response = self.chat_repository.create_message(data)
         if response:
@@ -103,7 +123,7 @@ class ChatService:
         }
 
     def get_by_session_id(
-        self, id: str, limit: int = 20, offset: int = 0
+        self, id: str, limit: int = 20, offset: int = 0, sender: str = None
     ) -> list:
         if offset == limit:
             return {
@@ -116,7 +136,18 @@ class ChatService:
                 },
                 "status_code": BAD_REQUEST
             }
-        data = {"session_id": id}
+        if not self.general_helpers.the_session_id_is_valid(id):
+            return {
+                "status": "error",
+                "error": {
+                    "code": "INVALID_FORMAT",
+                    "message": "Formato de session_id inválido",
+                    "details":
+                        f"El formato {id} debe ser de la forma: session-1f6d4f16-3fb0-4ae8-befe-dbd1b1c41e9c"
+                    },
+                "status_code": BAD_REQUEST
+            }
+        data = ChatService.__get_sender(id, sender)
         response = self.chat_repository.get_all_match(data)
         if response:
             response = [data_json.to_json() for data_json in response]

@@ -33,19 +33,10 @@ class MessageCreate(BaseModel):
         min_length=1,
         description="Contenido textual del mensaje."
     )
-    sender: Literal["user", "system"] = Field(
+    sender: str = Field(
         ...,
         description="Remitente del mensaje: 'user' o 'system'."
     )
-
-    @model_validator(mode='after')
-    def validate_sender_value(self):
-        """
-        Valida que el campo 'sender' sea 'user' o 'system'.
-        """
-        if self.sender not in ["user", "system"]:
-            raise ValueError("El campo 'sender' debe ser 'user' o 'system'")
-        return self
 
     class Config:
         """Configuración de Pydantic para el modelo."""

@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres:16-alpine
+    container_name: postgres-chatapi
+    environment:
+      POSTGRES_DB: chatapi
+      POSTGRES_USER: dagger
+      POSTGRES_PASSWORD: dager9123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chatapi
+
+  app:
+    build: .
+    container_name: fastapi_app
+    working_dir: /app
+    command: uvicorn app.config:app --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_USER: dagger
+      POSTGRES_PASSWORD: dager9123
+      POSTGRES_DB: chatapi
+      POSTGRES_HOST: db
+    depends_on:
+      - db
+    networks:
+      - chatapi
+
+volumes:
+  postgres_data:
+
+networks:
+  chatapi:
+    driver: bridge

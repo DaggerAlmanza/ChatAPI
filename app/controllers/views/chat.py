@@ -4,6 +4,7 @@ from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.decorator import cache
 from starlette.responses import JSONResponse
 from typing import Annotated
+from typing import Literal, Optional
 
 from app.controllers.serializers.response import (
     Response as ResponseSerializer,
@@ -53,9 +54,13 @@ async def get_chat(
     offset: Annotated[
         int, Query(ge=0, description="Número de elementos a omitir")
     ] = 0,
+    sender: Annotated[
+        Optional[Literal["user", "system"]],
+        Query(description="Filtra mensajes por remitente: 'user' o 'system'")
+    ] = None,
 ):
     response = chat_service.get_by_session_id(
-        session_id, limit, offset
+        session_id, limit, offset, sender
     )
     return JSONResponse(
         status_code=response.pop("status_code"),
